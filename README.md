@@ -19,10 +19,8 @@ This modern, glass-themed web app lets you **download the SVG file** or **copy t
 
 ## 🚀 Live Demo
 
-You can host this easily on **GitHub Pages**, **Netlify**, or any static web server.  
-Example path:
 ```
-soon
+https://ramiya-yt.github.io/IMG-2-SVG-Converter/
 ```
 
 ---
@@ -73,6 +71,7 @@ No data ever leaves your browser 🌐
 png2svg/
 ├── png2svg.html   # Main app (HTML + CSS + JS in one file)
 ├── favicon.png    # App icon used for tab & preview
+├── index.html     # Simple Redirect for Github Pages (Ignore this file)
 └── README.md      # Documentation
 ```
 
