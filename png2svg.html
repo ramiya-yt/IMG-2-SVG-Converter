@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Image → SVG Converter | RamiYa DEV</title>
+
+  <!-- 🔹 Description & SEO -->
+  <meta name="description"
+    content="Convert any image (PNG, JPG, WebP, etc.) to an SVG wrapper instantly. Download or copy inline SVG and data URL." />
+  <meta name="author" content="RamiYa DEV" />
+  <meta name="keywords" content="image to svg, png to svg, converter, data url, inline svg, RamiYa DEV" />
+
+  <!-- 🔹 Theme color for mobile browsers -->
+  <meta name="theme-color" content="#0b0c10" />
+
+  <!-- 🔹 Social / Sharing preview -->
+  <meta property="og:title" content="Image → SVG Converter" />
+  <meta property="og:description"
+    content="Convert any image to an SVG wrapper instantly. Copy inline SVG or download the file." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/png2svg.html" />
+  <meta property="og:image" content="/favicon.png" />
+
+  <!-- 🔹 Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Image → SVG Converter" />
+  <meta name="twitter:description"
+    content="Convert any image to SVG instantly with this modern web tool by RamiYa DEV." />
+  <meta name="twitter:image" content="/favicon.png" />
+
+  <!-- 🔹 Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top left, #1a1c24, #0b0c10);
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      color: #e9ecf1;
+    }
+
+    .card {
+      overflow: hidden;
+      width: 90%;
+      max-width: 850px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #5ed7ff, #00ffe1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .row,
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+    }
+
+    input,
+    button,
+    textarea {
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e9ecf1;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #00ffe1;
+      box-shadow: 0 0 8px #00ffe14d;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    button.primary {
+      background: linear-gradient(90deg, #00ffe1, #5ed7ff);
+      border: none;
+      color: #000;
+      font-weight: 600;
+      box-shadow: 0 0 12px #00ffe16e;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px #00ffe18e;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .preview {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+      transition: opacity 0.3s ease;
+    }
+
+
+    .preview img {
+      width: 200px;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.25s ease;
+    }
+
+    .preview img:hover {
+      transform: scale(1.05);
+    }
+
+    textarea#markup {
+      white-space: pre-wrap;
+      /* wrap long lines nicely */
+      overflow: auto;
+      /* scrollbars when needed */
+      max-height: 120px;
+      /* keep it contained */
+      line-height: 1.35;
+    }
+
+    /* Inline data URL: wrap & scroll; don’t break layout */
+    code.inline {
+      display: block;
+      white-space: pre-wrap;
+      /* allow wrapping */
+      word-break: break-all;
+      /* break long continuous strings */
+      overflow: auto;
+      /* scroll if too long */
+      max-height: 100px;
+      /* contain very long data URLs */
+      padding: 0.75rem;
+      border-radius: 10px;
+    }
+
+    /* Make preview images behave in small screens */
+    .preview img {
+      max-width: 240px;
+      max-height: 200px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    /* Keep control rows neat on narrow widths */
+    .row,
+    .grid {
+      gap: 1rem;
+    }
+
+    .out {
+      gap: .75rem;
+    }
+
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      width: 100%;
+      --margin-bottom: 1.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .file-line {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 230px;
+      flex: 1;
+    }
+
+    .file-line label {
+      font-size: 0.9rem;
+      color: #9aa0a6;
+    }
+
+    .file-line input[type="file"] {
+      width: 100%;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0.55rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .file-line input[type="file"]::file-selector-button {
+      background: linear-gradient(90deg, #00ffe1, #5ed7ff);
+      color: #000;
+      border: none;
+      padding: 0.55rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      margin-right: 0.8rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .file-line input[type="file"]::file-selector-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 12px #00ffe18e;
+    }
+
+    /* Make filename text look clean */
+    .file-line input[type="file"]:not(:disabled):hover {
+      border-color: #00ffe1;
+      box-shadow: 0 0 6px #00ffe14d;
+    }
+
+
+
+    .size-line {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .size-line input {
+      width: 120px;
+      text-align: center;
+    }
+
+    .num-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-width: 110px;
+    }
+
+    .num-field label {
+      font-size: 0.9rem;
+      color: #9aa0a6;
+    }
+
+    .num-field input {
+      text-align: center;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      padding: 0.55rem 0.6rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e5e7eb;
+      transition: all 0.25s ease;
+      height: 54px;
+    }
+
+    .num-field input:focus {
+      border-color: #00ffe1;
+      box-shadow: 0 0 6px #00ffe14d;
+      outline: none;
+    }
+
+    /* Button line below */
+    .btn-line {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .btn-line button {
+      width: 180px;
+      padding: 0.7rem 1rem;
+      font-size: 1rem;
+    }
+
+
+    code.inline {
+      display: block;
+      padding: 0.75rem;
+      word-wrap: break-word;
+      font-family: "JetBrains Mono", monospace;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: left;
+    }
+
+    label {
+      color: #9aa0a6;
+      font-size: 0.9rem;
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: #9aa0a6;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Hide any <img> that has no valid src to prevent broken icon */
+    img:not([src]),
+    img[src=""] {
+      display: none;
+    }
+
+    /* Toggleable container for each preview */
+    .pbox.hidden {
+      display: none;
+    }
+  </style>
+
+
+</head>
+
+<body>
+  <div class="card">
+    <h1>Image → SVG wrapper (download .svg + inline code)</h1>
+    <p class="small" style="margin-top:-0.5rem; margin-bottom:1.5rem; opacity:0.8;">
+      Upload your image and instantly get SVG output.
+    </p>
+
+
+    <div class="grid">
+      <div class="input-section">
+        <div class="input-row">
+          <div class="file-line">
+            <label>Choose Image</label>
+            <input id="file" type="file" accept="image/*" />
+          </div>
+
+          <div class="num-field">
+            <label>Width (px)</label>
+            <input id="w" type="number" placeholder="auto" />
+          </div>
+
+          <div class="num-field">
+            <label>Height (px)</label>
+            <input id="h" type="number" placeholder="auto" />
+          </div>
+        </div>
+
+        <div class="btn-line">
+          <button id="make" class="primary" disabled>Make SVG</button>
+        </div>
+      </div>
+
+
+
+      <div class="preview" id="previewSection" style="display:none;">
+        <div class="pbox" id="pngBox">
+          <div class="small">IMG preview</div>
+          <img id="pngPreview" alt="preview" />
+        </div>
+        <div class="pbox hidden" id="svgBox">
+          <div class="small">SVG preview (embedded PNG)</div>
+          <img id="svgPreview" alt="svg preview" />
+        </div>
+      </div>
+
+
+
+      <div class="out">
+        <div class="row">
+          <button id="download" disabled>Download .svg</button>
+          <button id="copyMarkup" disabled>Copy SVG markup</button>
+          <button id="copyDataUrl" disabled>Copy data: URL</button>
+        </div>
+
+        <div>
+          <label>SVG markup</label>
+          <textarea id="markup" readonly></textarea>
+        </div>
+
+        <div>
+          <label>Inline data URL</label>
+          <code id="dataurl" class="inline"></code>
+        </div>
+
+        <p class="small">
+          Created by RamiYa DEV ©️
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+    const fileInput = $('#file');
+    const makeBtn = $('#make');
+    const downloadBtn = $('#download');
+    const copyMarkupBtn = $('#copyMarkup');
+    const copyDataUrlBtn = $('#copyDataUrl');
+    const pngPreview = $('#pngPreview');
+    const svgPreview = $('#svgPreview');
+    const wInput = $('#w');
+    const hInput = $('#h');
+    const markup = $('#markup');
+    const dataurl = $('#dataurl');
+
+    let pngDataURL = null;
+    let pngNaturalW = null;
+    let pngNaturalH = null;
+    let lastSVGText = '';
+    let lastSVGDataURL = '';
+
+    fileInput.addEventListener('change', async () => {
+      resetOutputs(); // keep your existing function call
+
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { alert('Please select a Image file.'); fileInput.value = ''; return; }
+
+      pngDataURL = await readAsDataURL(file);
+      const size = await imageSize(pngDataURL);
+      pngNaturalW = size.width; pngNaturalH = size.height;
+
+      // show the preview section and IMG preview only
+      document.getElementById('previewSection').style.display = 'flex';
+      document.getElementById('pngBox').classList.remove('hidden');
+
+      // set IMG preview src
+      pngPreview.src = pngDataURL;
+
+      // hide SVG preview until we generate it
+      document.getElementById('svgBox').classList.add('hidden');
+      svgPreview.removeAttribute('src');
+
+      // prefill dimensions and enable "Make SVG"
+      wInput.value = pngNaturalW; hInput.value = pngNaturalH;
+      makeBtn.disabled = false;
+
+      // also disable output buttons until SVG is made
+      downloadBtn.disabled = true;
+      copyMarkupBtn.disabled = true;
+      copyDataUrlBtn.disabled = true;
+    });
+
+
+    makeBtn.addEventListener('click', () => {
+      if (!pngDataURL) return;
+
+      const W = parseInt(wInput.value, 10) || pngNaturalW || 512;
+      const H = parseInt(hInput.value, 10) || pngNaturalH || 512;
+
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
+        `<image href="${escapeXMLAttr(pngDataURL)}" width="${W}" height="${H}" />` +
+        `</svg>`;
+
+      lastSVGText = svg;
+
+      const svgBlob = new Blob([svg], { type: 'image/svg+xml' });
+      const objectURL = URL.createObjectURL(svgBlob);
+
+      // set src then show box; revoke URL after load
+      svgPreview.onload = () => { URL.revokeObjectURL(objectURL); };
+      svgPreview.src = objectURL;
+      document.getElementById('svgBox').classList.remove('hidden');
+
+      lastSVGDataURL = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+      markup.value = svg;
+      dataurl.textContent = lastSVGDataURL;
+
+      downloadBtn.disabled = false;
+      copyMarkupBtn.disabled = false;
+      copyDataUrlBtn.disabled = false;
+    });
+
+
+    downloadBtn.addEventListener('click', () => {
+      if (!lastSVGText) return;
+      const blob = new Blob([lastSVGText], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'img2svg_ffdev.svg';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    copyMarkupBtn.addEventListener('click', async () => {
+      if (!lastSVGText) return;
+      await navigator.clipboard.writeText(lastSVGText);
+      flash(copyMarkupBtn);
+    });
+
+    copyDataUrlBtn.addEventListener('click', async () => {
+      if (!lastSVGDataURL) return;
+      await navigator.clipboard.writeText(lastSVGDataURL);
+      flash(copyDataUrlBtn);
+    });
+
+    function resetOutputs() {
+      document.getElementById("previewSection").style.display = "none";
+      pngPreview.removeAttribute('src');
+      svgPreview.removeAttribute('src');
+      markup.value = '';
+      dataurl.textContent = '';
+      downloadBtn.disabled = true;
+      copyMarkupBtn.disabled = true;
+      copyDataUrlBtn.disabled = true;
+      lastSVGText = '';
+      lastSVGDataURL = '';
+      document.getElementById('svgBox').classList.add('hidden');
+    }
+
+    function readAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = reject;
+        fr.readAsDataURL(file);
+      });
+    }
+
+    function imageSize(dataURL) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        img.onerror = reject;
+        img.src = dataURL;
+      });
+    }
+
+    function escapeXMLAttr(str) {
+      // minimal escaping for embedding data URLs safely in an attribute
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;');
+    }
+
+    function flash(btn) {
+      const prev = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = prev, 900);
+    }
+    window.addEventListener('error', (e) => {
+      console.warn('An error occurred:', e.message);
+    });
+
+  </script>
+</body>
+
+</html>
